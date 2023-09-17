@@ -183,3 +183,28 @@ on P.pro_id = pri.pro_id;
 select cus_name, cus_gender
 from customer
 where cus_name like '%a'or cus_name like 'a%';
+
+-- Question 9.
+DELIMITER $$
+create procedure GetSupplierRatings()
+begin
+select sup.Supp_ID,sup.Supp_Name,tab2.rat_ratstars as Rating,
+case
+when avg(tab2.RAT_RATSTARS) = 5 then 'Excellent Service'
+when avg(tab2.RAT_RATSTARS) > 4 then 'Good Service'
+when avg(tab2.RAT_RATSTARS) > 2 then 'Average Service'
+else 'Poor Service'
+end as Type_of_Service
+from Supplier sup
+join( select s.pricing_id,tab1.rat_ratstars,s.supp_id
+from supplier_pricing s join
+(select o.ord_id, r.rat_ratstars,o.pricing_id
+from rating r join orders o
+on r.ord_id = o.ord_id)as tab1
+on tab1.pricing_id = s.pricing_id) as tab2
+on sup.supp_id = tab2.supp_id
+group by
+sup.Supp_ID, sup.Supp_Name;
+end;$$
+DELIMITER ;
+
